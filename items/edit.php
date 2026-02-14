@@ -1,0 +1,37 @@
+<?php
+
+include '../connect.php';
+
+$table = "items";
+
+$id = filterRequest("items_id");
+$name      = filterRequest("name");
+$storehousecount     = filterRequest("storehousecount");
+$pointofsale1count     = filterRequest("pointofsale1count");
+$pointofsale2count     = filterRequest("pointofsale2count");
+$costprice     = filterRequest("costprice");
+$wholesaleprice     = filterRequest("wholesaleprice");
+$retailprice     = filterRequest("retailprice");
+$wholesalediscount  = filterRequest("wholesalediscount");
+$retaildiscount  = filterRequest("retaildiscount");
+$datenow   = filterRequest("items_date");
+
+
+
+    $data = array( 
+    "items_name"        => $name,
+    "items_storehouse_count"     => $storehousecount,
+    "items_pointofsale1_count"     => $pointofsale1count,
+    "items_pointofsale2_count"       => $pointofsale2count,
+    "items_cost_price"       => $costprice,
+    "items_wholesale_price"       => $wholesaleprice,
+    "items_retail_price"    => $retailprice,
+    "items_wholesale_discount"      => $wholesalediscount,
+    "items_retail_discount"    => $retaildiscount,
+    "items_date"    => $datenow,
+        );
+
+sendFCM("تنبيه", "تم تعديل المنتج ذو المعرف: $id","point", "", "refreshitems" , $accessToken);
+
+
+updateData($table, $data, "items_id = $id");
