@@ -27,3 +27,19 @@ INNER JOIN
 INNER JOIN 
     items
       ON items.items_id = incoming_invoice_items.incoming_invoice_items_items_id;
+
+
+
+CREATE OR REPLACE VIEW transfer_of_itemsview AS
+SELECT 
+    transfer_of_items.*, 
+    transfer.*,
+    items.items_name
+FROM 
+    transfer_of_items
+INNER JOIN 
+    transfer
+      ON transfer.transfer_id = transfer_of_items.transfer_of_items_transfer_id
+INNER JOIN 
+    items
+      ON items.items_id = transfer_of_items.transfer_of_items_items_id ;
