@@ -46,12 +46,18 @@ try {
         `items_pointofsale2_count` = `items_pointofsale2_count` + ? 
         WHERE `items_id` = ?");
 
+    $total_pos1_affected = 0;
+    $total_pos2_affected = 0;
+
     foreach ($data['items'] as $item) {
         $items_id = $item['items_id'];
         $storehouse_count = $item['storehouse_count']; // This is the NEW total in storehouse
         $pos1_add = $item['pos1_count'];               // This is the ADDED quantity to pos1
         $pos2_add = $item['pos2_count'];               // This is the ADDED quantity to pos2
         $note = isset($item['note']) ? $item['note'] : "";
+
+        $total_pos1_affected += $pos1_add;
+        $total_pos2_affected += $pos2_add;
 
         // 2. Insert into transfer_of_items (Archive)
         $stmt_item_insert->execute([
@@ -64,14 +70,28 @@ try {
         ]);
 
         // 3. Update items table
-        // items_storehouse_count is replaced by the new value
-        // pos counts are incremented by the transferred amount
         $stmt_item_update->execute([
             $storehouse_count,
             $pos1_add,
             $pos2_add,
             $items_id
         ]);
+    }
+
+    // 4. Send FCM Notifications based on affected POS
+    if ($total_pos1_affected > 0 || $total_pos2_affected > 0) {
+        $topic = "";
+        if ($total_pos1_affected > 0 && $total_pos2_affected > 0) {
+            $topic = "point";
+        } elseif ($total_pos1_affected > 0) {
+            $topic = "point1";
+        } elseif ($total_pos2_affected > 0) {
+            $topic = "point2";
+        }
+
+        if ($topic != "") {
+            sendFCM("تنبيه", "تم تحويل منتجات جديدة إليكم", $topic, "", "refreshitems", $accessToken);
+        }
     }
 
     $con->commit();

@@ -34,6 +34,6 @@ $data = [
 ];
 
 
-// sendFCM("تنبيه", "تم اضافة منتج جديد","point", "", "refreshitems" , $accessToken);
+sendFCM("تنبيه", "تم اضافة منتج جديد","point", "", "refreshitems" , $accessToken);
 
 insertData($table, $data);

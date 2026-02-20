@@ -70,6 +70,22 @@ try {
         WHERE `items_id` = ?");
     $stmt_items->execute([$diff_s, $diff_p1, $diff_p2, $new_cost, $wholesale_price, $retail_price, $items_id]);
 
+    // 4. Send FCM Notifications if POS counts changed
+    if ($diff_p1 != 0 || $diff_p2 != 0) {
+        $topic = "";
+        if ($diff_p1 != 0 && $diff_p2 != 0) {
+            $topic = "point";
+        } elseif ($diff_p1 != 0) {
+            $topic = "point1";
+        } elseif ($diff_p2 != 0) {
+            $topic = "point2";
+        }
+
+        if ($topic != "") {
+            sendFCM("تنبيه", "تم تعديل بيانات منتجات", $topic, "", "refreshitems", $accessToken);
+        }
+    }
+
     $con->commit();
     printSuccess("Invoice item updated successfully");
 

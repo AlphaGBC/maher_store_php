@@ -51,6 +51,9 @@ try {
         `items_retail_price` = ? 
         WHERE `items_id` = ?");
 
+    $total_pos1_affected = 0;
+    $total_pos2_affected = 0;
+
     foreach ($data['items'] as $item) {
         $items_id = $item['items_id'];
         $supplier_id = $item['supplier_id'];
@@ -59,6 +62,9 @@ try {
         $pos2_count = $item['pos2_count'];
         $cost_price = $item['cost_price'];
         $note = isset($item['note']) ? $item['note'] : "";
+
+        $total_pos1_affected += $pos1_count;
+        $total_pos2_affected += $pos2_count;
 
         // 2. Insert into incoming_invoice_items
         $stmt_item_insert->execute([
@@ -86,6 +92,22 @@ try {
             $retail_price,
             $items_id
         ]);
+    }
+
+    // 5. Send FCM Notifications based on affected POS
+    if ($total_pos1_affected > 0 || $total_pos2_affected > 0) {
+        $topic = "";
+        if ($total_pos1_affected > 0 && $total_pos2_affected > 0) {
+            $topic = "point";
+        } elseif ($total_pos1_affected > 0) {
+            $topic = "point1";
+        } elseif ($total_pos2_affected > 0) {
+            $topic = "point2";
+        }
+
+        if ($topic != "") {
+            sendFCM("تنبيه", "تم اضافة منتجات جديدة", $topic, "", "refreshitems", $accessToken);
+        }
     }
 
     $con->commit();
